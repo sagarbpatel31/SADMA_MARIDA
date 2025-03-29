@@ -17,10 +17,9 @@ pd.set_option('display.max_columns', None)
 
 # Evaluation for Pixel-level semantic segmentation
 def Evaluation(y_predicted, y_true):
-
-    micro_prec = precision_score(y_true, y_predicted, average='micro')
-    macro_prec = precision_score(y_true, y_predicted, average='macro')
-    weight_prec = precision_score(y_true, y_predicted, average='weighted')
+    micro_prec = precision_score(y_true, y_predicted, average='micro',zero_division=1)
+    macro_prec = precision_score(y_true, y_predicted, average='macro',zero_division=1)
+    weight_prec = precision_score(y_true, y_predicted, average='weighted',zero_division=1)
     
     micro_rec = recall_score(y_true, y_predicted, average='micro')
     macro_rec = recall_score(y_true, y_predicted, average='macro')
