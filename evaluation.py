@@ -47,7 +47,7 @@ def main(options):
     else:
         device = torch.device("cpu")
         
-    model = AttentionUNet(11, 11)
+    model = ResAttUNet(11, 11)
     model.to(device)
 
     # Load model from specific epoch to continue the training or start the evaluation
