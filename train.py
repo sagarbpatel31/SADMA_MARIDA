@@ -143,10 +143,10 @@ optimizer = torch.optim.Adam(model.parameters(), lr=initialLR, weight_decay=deca
 
 # Learning Rate scheduler
 if schedulerLR=="rop":
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10)
 else:
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [40,80,120,160], gamma=0.5, verbose=True)
-
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [40,80,120,160], gamma=0.5)
+print(f"Current LR: {scheduler.get_last_lr()}")
 bestMacroF1 = 0.0
 bestMicroF1 = 0.0
 bestWeightF1 = 0.0
