@@ -28,6 +28,9 @@ from customLosses import FocalLoss
 
 from torch.utils.tensorboard import SummaryWriter
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow CUDA logs
+os.environ['CUDA_VISIBLE_DEVICES'] = '0' 
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--trainBatchSize', type=int, default=8, help="batch size to use to train the model")
