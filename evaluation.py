@@ -47,8 +47,8 @@ def main(options):
     else:
         device = torch.device("cpu")
         
-    model = AttentionUNet(11, 11)
-    model.load_state_dict(torch.load("/content/drive/MyDrive/marida/savedModels/att-unet/bestMacroF1Model.pth", map_location = device))
+    model = ResAttUNet(11, 11)
+    # model.load_state_dict(torch.load("/content/drive/MyDrive/marida/savedModels/att-unet/bestMacroF1Model.pth", map_location = device))
     model.to(device)
 
     # Load model from specific epoch to continue the training or start the evaluation
