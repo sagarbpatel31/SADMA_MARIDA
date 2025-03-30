@@ -109,9 +109,15 @@ standardization = transforms.Normalize(bands_mean, bands_std)
 datasetTrain = GenDEBRIS('train', transform=transformTrain, standardization = standardization, agg_to_water = agg_to_water)
 datasetTest = GenDEBRIS('val', transform=transformTest, standardization = standardization, agg_to_water = agg_to_water)
 
+class_sample_count = np.array([class_distr[c] for c in range(11)])  # Class frequencies
+weights = 1. / class_sample_count
+samples_weights = [weights[t] for t in datasetTrain.labels]
+
+sampler = WeightedRandomSampler(samples_weights, len(samples_weights), replacement=True)
+
 trainLoader = DataLoader(datasetTrain, 
                         batch_size = batchSizeTrain, 
-                        shuffle=True,
+                        sampler = sampler,
                         worker_init_fn=seedWorker,
                         generator=g)
         
@@ -243,6 +249,10 @@ for epoch in range(1, totalEpochs+1):
 
         writer.add_scalar('Test Macro IoU', acc["IoU"], epoch)
         print("Test Macro IoU",acc["IoU"])
+
+    print("Target Shape:", target.shape, "Target Min:", target.min(), "Target Max:", target.max())
+    unique_labels, counts = np.unique(yTrue, return_counts=True)
+    print("Label distribution in test set:", dict(zip(unique_labels, counts)))
     if schedulerLR=="rop":
         scheduler.step(sum(testLossF) / testBatches)
     else:
