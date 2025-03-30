@@ -55,7 +55,7 @@ batchSizeTest = args.testBatchSize
 trainOnGPU = args.trainOnGPU
 totalEpochs = args.totalNumberOfEpochs
 logPath = args.experimentName
-initialLR = 0.0001
+initialLR = args.initialLearningRate
 decayLR = args.decayLearningRate
 schedulerLR = args.learningRateScheduler
 bestValidationAccuracy = 0.0
@@ -160,13 +160,14 @@ else:
     loss_fn = nn.CrossEntropyLoss(weight=weight.to(device))
     # criterion = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction= 'mean', weight=weight.to(device))
 
-optimizer = torch.optim.Adam(model.parameters(), lr=initialLR, weight_decay=decayLR)
+optimizer = torch.optim.Adam(model.parameters(), lr=initialLR, weight_decay=1e-5)
 
 # Learning Rate scheduler
 if schedulerLR=="rop":
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10)
 else:
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [40,80,120,160], gamma=0.5)
+    #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [40,80,120,160], gamma=0.5)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=totalEpochs)
 print(f"Current LR: {scheduler.get_last_lr()}")
 bestMacroF1 = 0.0
 bestMicroF1 = 0.0
@@ -207,11 +208,12 @@ for epoch in range(1, totalEpochs+1):
             mask = target != -1
             logits = logits[mask]
             target = target[mask]
-            probs = torch.nn.functional.softmax(logits, dim=1).cpu().numpy()
+            #probs = torch.nn.functional.softmax(logits, dim=1).cpu().numpy()
             target = target.cpu().numpy()
             testBatches += target.shape[0]
             testLossF.append((loss.data*target.shape[0]).tolist())
-            yPredicted += probs.argmax(1).tolist()
+            #yPredicted += probs.argmax(1).tolist()
+            yPredicted += logits.argmax(1).cpu().numpy().tolist()
             yTrue += target.tolist()
         writer.add_scalar('Testing Loss', sum(testLossF)/testBatches, epoch)
         yPredicted = np.asarray(yPredicted)
