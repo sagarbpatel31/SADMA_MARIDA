@@ -109,23 +109,9 @@ standardization = transforms.Normalize(bands_mean, bands_std)
 datasetTrain = GenDEBRIS('train', transform=transformTrain, standardization = standardization, agg_to_water = agg_to_water)
 datasetTest = GenDEBRIS('val', transform=transformTest, standardization = standardization, agg_to_water = agg_to_water)
 
-labels = [sample[1] for sample in datasetTrain]  # Assuming datasetTrain returns (image, target)
-
-# Count class occurrences
-class_counts = Counter(labels)
-total_samples = sum(class_counts.values())
-
-# Compute class weights (inverse of frequency)
-class_weights = {cls: total_samples / count for cls, count in class_counts.items()}
-
-# Convert to a list of weights corresponding to dataset samples
-sample_weights = [class_weights[label] for label in labels]
-
-sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
-
 trainLoader = DataLoader(datasetTrain, 
                         batch_size = batchSizeTrain, 
-                        sampler=sampler,
+                        shuffle=True,
                         worker_init_fn=seedWorker,
                         generator=g)
         
