@@ -109,17 +109,9 @@ standardization = transforms.Normalize(bands_mean, bands_std)
 datasetTrain = GenDEBRIS('train', transform=transformTrain, standardization = standardization, agg_to_water = agg_to_water)
 datasetTest = GenDEBRIS('val', transform=transformTest, standardization = standardization, agg_to_water = agg_to_water)
 
-class_sample_count = np.array([class_distr[c] for c in range(11)])  # Class frequencies
-weights = 1. / class_sample_count
-print(vars(datasetTrain))
-samples_weights = [weights[t] for t in datasetTrain.targets]
-
-
-sampler = WeightedRandomSampler(samples_weights, len(samples_weights), replacement=True)
-
 trainLoader = DataLoader(datasetTrain, 
                         batch_size = batchSizeTrain, 
-                        sampler = sampler,
+                        shuffle=True,
                         worker_init_fn=seedWorker,
                         generator=g)
         
