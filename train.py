@@ -18,6 +18,7 @@ from os.path import dirname as up
 
 import torch
 import torchvision.transforms as transforms
+from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from model import *
@@ -25,6 +26,8 @@ from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform
 from metrics import Evaluation
 from tqdm import tqdm
 from customLosses import FocalLoss
+from collections import Counter
+from torch.utils.data import WeightedRandomSampler
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -52,7 +55,7 @@ batchSizeTest = args.testBatchSize
 trainOnGPU = args.trainOnGPU
 totalEpochs = args.totalNumberOfEpochs
 logPath = args.experimentName
-initialLR = args.initialLearningRate
+initialLR = 0.0001
 decayLR = args.decayLearningRate
 schedulerLR = args.learningRateScheduler
 bestValidationAccuracy = 0.0
@@ -95,10 +98,24 @@ standardization = transforms.Normalize(bands_mean, bands_std)
 
 datasetTrain = GenDEBRIS('train', transform=transformTrain, standardization = standardization, agg_to_water = agg_to_water)
 datasetTest = GenDEBRIS('val', transform=transformTest, standardization = standardization, agg_to_water = agg_to_water)
-        
+
+labels = [sample[1] for sample in datasetTrain]  # Assuming datasetTrain returns (image, target)
+
+# Count class occurrences
+class_counts = Counter(labels)
+total_samples = sum(class_counts.values())
+
+# Compute class weights (inverse of frequency)
+class_weights = {cls: total_samples / count for cls, count in class_counts.items()}
+
+# Convert to a list of weights corresponding to dataset samples
+sample_weights = [class_weights[label] for label in labels]
+
+sampler = WeightedRandomSampler(sample_weights, num_samples=len(sample_weights), replacement=True)
+
 trainLoader = DataLoader(datasetTrain, 
                         batch_size = batchSizeTrain, 
-                        shuffle = True,
+                        sampler=sampler,
                         worker_init_fn=seedWorker,
                         generator=g)
         
@@ -136,8 +153,10 @@ if agg_to_water:
 if useFocalLoss:
     criterion = FocalLoss()
 else:
-    weight = gen_weights(class_distr, c = 1.03)
-    criterion = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction= 'mean', weight=weight.to(device))
+    # weight = gen_weights(class_distr, c = 1.03)
+    weight = compute_class_weight(class_weight="balanced", classes=np.unique(y_train), y=y_train)
+    loss_fn = nn.CrossEntropyLoss(weight=weight.to(device))
+    # criterion = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction= 'mean', weight=weight.to(device))
 
 optimizer = torch.optim.Adam(model.parameters(), lr=initialLR, weight_decay=decayLR)
 
