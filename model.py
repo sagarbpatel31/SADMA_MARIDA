@@ -15,9 +15,13 @@ import numpy as np
 from torch import nn
 import random
 
-random.seed(0)
-np.random.seed(0)
-torch.manual_seed(0)
+# random.seed(0)
+# np.random.seed(0)
+# torch.manual_seed(0)
+
+torch.cuda.manual_seed_all(0)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
