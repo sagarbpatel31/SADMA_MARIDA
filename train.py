@@ -228,6 +228,7 @@ for epoch in range(1, totalEpochs+1):
         writer.add_scalar('Test Weight Recall', acc["weightRec"], epoch)
 
         print("Test Macro F1",acc["macroF1"])
+        print("Subset Acc:",acc["subsetAcc"])
         writer.add_scalar('Test Macro F1', acc["macroF1"], epoch)
         if acc["macroF1"]>bestMacroF1:
           bestMacroF1 = acc["macroF1"]
