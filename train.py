@@ -88,9 +88,19 @@ g = torch.Generator()
 g.manual_seed(0)
 agg_to_water = True
 
-transformTrain = transforms.Compose([transforms.ToTensor(),
-                                    RandomRotationTransform([-90, 0, 90, 180]),
-                                    transforms.RandomHorizontalFlip()])
+# transformTrain = transforms.Compose([transforms.ToTensor(),
+#                                     RandomRotationTransform([-90, 0, 90, 180]),
+#                                     transforms.RandomHorizontalFlip()])
+
+transformTrain = transforms.Compose([
+    transforms.ToTensor(),
+    RandomRotationTransform([-90, 0, 90, 180]),
+    transforms.RandomHorizontalFlip(),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.GaussianBlur(kernel_size=3),
+    transforms.RandomAffine(degrees=0, shear=10),
+    transforms.RandomPerspective(distortion_scale=0.5, p=0.5)
+])
     
 transformTest = transforms.Compose([transforms.ToTensor()])
     
