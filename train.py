@@ -229,7 +229,6 @@ for epoch in range(1, totalEpochs+1):
 
         print("Test Macro F1",acc["macroF1"])
         print("Subset Acc:",acc["subsetAcc"])
-        print("Loss:, acc["rankLoss"])
         writer.add_scalar('Test Macro F1', acc["macroF1"], epoch)
         if acc["macroF1"]>bestMacroF1:
           bestMacroF1 = acc["macroF1"]
