@@ -106,9 +106,6 @@ class GenDEBRIS(Dataset): # Extend PyTorch's Dataset class
         target = self.y[index]
 
         img = np.moveaxis(img, [0, 1, 2], [2, 0, 1]).astype('float32')       # CxWxH to WxHxC
-
-        img_test, label = self.load_data(idx)
-        print(f"Image Shape: {img_test.shape}, Label Shape: {label.shape}")
       
         nan_mask = np.isnan(img)
         img[nan_mask] = self.impute_nan[nan_mask]
